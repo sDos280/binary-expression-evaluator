@@ -5,14 +5,14 @@ This is a small, easy-to-read binary expression evaluator written in Python. The
 
 To take a string of binary expression and evaluate it.
 To be able to understand the "Order of Operations."
-So, how do we start implementing that? Let's look at the kind of input we expect: 6 + 5 * 30. If we plug that into a calculator, we get 156. How was the calculator able to compute that?
+So, how do we start implementing that? Let's look at the kind of input we expect: `6 + 5 * 30`. If we plug that into a calculator, we get `156`. How was the calculator able to compute that?
 
 Tokens
-When we see an expression like 6 + 5 * 30, we need a way to represent the string to the computer. To do that, we use the concept of tokens.
+When we see an expression like `6 + 5 * 30`, we need a way to represent the string to the computer. To do that, we use the concept of tokens.
 
-Tokens can be thought of as the breaking down of a string into its most valuable data. For example, we know that the expressions 6 + 5 * 30 and 6+5*30 will have the same "interpretation" because we know that white spaces don't really have a real value in the expression string.
+Tokens can be thought of as the breaking down of a string into its most valuable data. For example, we know that the expressions `6 + 5 * 30` and `6+5*30` will have the same "interpretation" because we know that white spaces don't really have a real value in the expression string.
 
-So, what actually is the useful data in an expression? The literals and operations, of course. While removing the white spaces of an expression won't affect it, removing any literals or operations can dramatically change the value of an expression. For example, removing the 6 + from 6 + 5 * 30 will dramatically change the value of the expression.
+So, what actually is the useful data in an expression? The literals and operations, of course. While removing the white spaces of an expression won't affect it, removing any literals or operations can dramatically change the value of an expression. For example, removing the `6 +` from `6 + 5 * 30` will dramatically change the value of the expression.
 
 Then, how can we write a tool (tokenizer) that is able to translate a string to its corresponding tokens?
 
