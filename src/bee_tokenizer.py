@@ -32,7 +32,7 @@ class Tokenizer:
 
             elif self.input_string[index] in "+-*/":  # check for operator, if true add the specific operator
                 if self.input_string[index] in "+":
-                    self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.Pluss, '+'))
+                    self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.Plus, '+'))
                 elif self.input_string[index] in "-":
                     self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.Minus, '-'))
                 elif self.input_string[index] in "*":

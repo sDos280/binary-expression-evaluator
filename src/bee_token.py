@@ -2,7 +2,7 @@ import enum
 
 
 class TokenKind(enum.IntEnum):
-    Pluss = enum.auto()  # +
+    Plus = enum.auto()  # +
     Minus = enum.auto()  # -
     Asterisk = enum.auto()  # *
     ForwardSlash = enum.auto()  # /

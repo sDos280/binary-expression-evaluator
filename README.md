@@ -43,3 +43,19 @@ As you can see here, we declare a Tokenizer object that contains two fields:
 
 * "input_string": The input string to tokenize.
 * "tokens": The list of tokens generated from the input string.
+
+
+# Parser grammar
+
+expression grammar:
+```
+EXPR
+    : EXPR '+' EXPR
+    | EXPR '-' EXPR
+    | EXPR '*' EXPR
+    | EXPR '/' EXPR
+    | '(' EXPR ')'
+    | number
+    | variable
+    ;
+```
