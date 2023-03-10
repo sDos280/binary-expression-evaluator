@@ -8,6 +8,9 @@ class TokenKind(enum.IntEnum):
     ForwardSlash = enum.auto()  # /
     Integer = enum.auto()
     Float = enum.auto()
+    OpenParenthesis = enum.auto()  # (
+    ClosingParenthesis = enum.auto()  # )
+    END = enum.auto()  # end token
 
 
 class Token:

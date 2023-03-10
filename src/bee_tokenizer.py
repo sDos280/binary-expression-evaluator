@@ -42,5 +42,15 @@ class Tokenizer:
 
                 index += 1
 
+            elif self.input_string[index] in "()":   # check for open/closing parenthesis, if true add the specific parenthesis
+                if self.input_string[index] in "(":
+                    self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.OpenParenthesis, '('))
+                elif self.input_string[index] in ")":
+                    self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.ClosingParenthesis, ')'))
+
+                index += 1
+
             else:  # the character is unknown
                 raise SyntaxError(f"the character \'{self.input_string[index]}\' is unknown")
+
+        self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.END, ""))
