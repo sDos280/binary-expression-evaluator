@@ -8,5 +8,5 @@ expression grammar:
 ```
 expression -> term {-|+ term}
 term       -> factor {*|/ term}
-factor     -> integer | float | (expression) | -factor
+factor     -> integer | float | (expression) | -factor | function_name({expression,}) 
 ```

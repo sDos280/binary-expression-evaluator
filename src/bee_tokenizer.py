@@ -50,8 +50,25 @@ class Tokenizer:
 
                 index += 1
 
+            elif self.input_string[index] == ",":  # check for comma
+                self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.Comma, ','))
+
+                index += 1
+
+            elif self.input_string[index].isalpha():  # check for identifies(function names)
+                temp = ""
+
+                while index < len(self.input_string) and self.input_string[index].isalpha():
+                    temp += self.input_string[index]
+                    index += 1
+
+                if temp != "":
+                    self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.Identifier, temp))
+
             else:  # the character is unknown
+
                 raise SyntaxError(f"the character \'{self.input_string[index]}\' is unknown")
+
 
         # add end token
         self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.END, ""))

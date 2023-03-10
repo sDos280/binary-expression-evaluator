@@ -10,7 +10,10 @@ class TokenKind(enum.IntEnum):
     Float = enum.auto()
     OpenParenthesis = enum.auto()  # (
     ClosingParenthesis = enum.auto()  # )
+    Comma = enum.auto()  # ,
+    Identifier = enum.auto()  # ,
     END = enum.auto()  # end token
+
 
 
 class Token:

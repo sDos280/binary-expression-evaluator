@@ -1,5 +1,6 @@
 import src.bee_token
 import enum
+import math
 
 
 class OperatorType(enum.IntEnum):
@@ -25,7 +26,7 @@ class Value:
 class Negate:
     """negate node"""
 
-    def __init__(self, value: 'Operator | Value'):
+    def __init__(self, value: 'Operator | Value | Negate | Function'):
         self.value = value
 
     def __str__(self):
@@ -34,11 +35,10 @@ class Negate:
     def eval(self):
         return -self.value.eval()
 
-
 class Operator:
     """operator node"""
 
-    def __init__(self, type: OperatorType, left: 'Operator | Value | Negate', right: 'Operator | Value | Negate'):
+    def __init__(self, type: OperatorType, left: 'Operator | Value | Negate | Function', right: 'Operator | Value | Negate | Function'):
         self.type = type
         self.left = left
         self.right = right
@@ -71,6 +71,41 @@ class Operator:
             case OperatorType.Division:
                 return self.left.eval() / self.right.eval()
 
+class Function:
+    """function node"""
+
+    def __init__(self, name: str, expressions: list['Operator | Value | Negate | Function']):
+        self.name = name
+        self.expressions = expressions
+
+    def __str__(self):
+        str_ = f"{self.name}("
+        if len(self.expressions) == 1:
+            str_ += f"{self.expressions[0]})"
+        else:
+            for expression in self.expressions:
+                str_ += f"{expression}, "
+
+        str_ = str_[:-2]
+        str_ += ")"
+
+        return str_
+
+    def eval(self):
+        match self.name:
+            case "sin":
+                if len(self.expressions) == 1:
+                    return math.sin(self.expressions[0].eval())
+                else:
+                    raise SyntaxError(f"too much arguments")
+            case "cos":
+                if len(self.expressions) == 1:
+                    return math.cos(self.expressions[0].eval())
+                else:
+                    raise SyntaxError(f"too much arguments")
+
+            case _:
+                raise SyntaxError(f"the function \"{self.name}\" isn't supported")
 
 class Parser:
     """parser"""
@@ -149,5 +184,27 @@ class Parser:
         elif self.current_token.kind == src.bee_token.TokenKind.Minus:
             self.scan_token()
             return Negate(self.parse_factor())
+        elif self.current_token.kind == src.bee_token.TokenKind.Identifier:
+            name = self.current_token.string
+            self.scan_token()
+            expressions: list['Operator | Value | Negate'] = []
+            if self.current_token.kind == src.bee_token.TokenKind.OpenParenthesis:
+                self.scan_token()
+                sub_expression = self.parse_expression()
+                expressions.append(sub_expression)
+
+                while sub_expression is not None and self.current_token.kind == src.bee_token.TokenKind.Comma:
+                    self.scan_token()
+                    sub_expression = self.parse_expression()
+                    if sub_expression is not None:
+                        expressions.append(sub_expression)
+
+                if self.current_token.kind == src.bee_token.TokenKind.ClosingParenthesis:
+                    self.scan_token()
+                    return Function(name, expressions)
+                else:
+                    return None
+            else:
+                return None
         else:
             return None
