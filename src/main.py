@@ -8,11 +8,10 @@ if __name__ == '__main__':
 
     tk.tokenize()
 
-    [print(i.string, f": {index}") for index, i in enumerate(tk.tokens)]
-
     pr: src.bee_parser.Parser = src.bee_parser.Parser(tk.tokens)
 
     print(pr.start_node)
+    print("The expression is evaluated to:", pr.start_node.eval())
 
 
 

@@ -18,6 +18,9 @@ class Value:
     def __str__(self):
         return str(self.value)
 
+    def eval(self):
+        return self.value
+
 
 class Negate:
     """negate node"""
@@ -27,6 +30,9 @@ class Negate:
 
     def __str__(self):
         return f"(-{str(self.value)})"
+
+    def eval(self):
+        return -self.value.eval()
 
 
 class Operator:
@@ -53,6 +59,17 @@ class Operator:
         str_ += f"{self.right})"
 
         return str_
+
+    def eval(self):
+        match self.type:
+            case OperatorType.Addition:
+                return self.left.eval() + self.right.eval()
+            case OperatorType.Subtraction:
+                return self.left.eval() - self.right.eval()
+            case OperatorType.Multiplication:
+                return self.left.eval() * self.right.eval()
+            case OperatorType.Division:
+                return self.left.eval() / self.right.eval()
 
 
 class Parser:

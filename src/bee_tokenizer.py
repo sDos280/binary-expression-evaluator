@@ -53,4 +53,5 @@ class Tokenizer:
             else:  # the character is unknown
                 raise SyntaxError(f"the character \'{self.input_string[index]}\' is unknown")
 
+        # add end token
         self.tokens.append(src.bee_token.Token(src.bee_token.TokenKind.END, ""))
