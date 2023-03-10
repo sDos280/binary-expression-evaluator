@@ -6,7 +6,7 @@ a math binary expression evaluator writen in python
 
 expression grammar:
 ```
-expression -> term {-|+ term}
-term       -> factor {*|/ term}
-factor     -> integer | float | (expression) | -factor | function_name({expression,}) 
+expression -> term {"-"|"+" term}
+term       -> factor {"*"|"/" factor}
+factor     -> integer | float | "(" expression ")" | "-" factor | "function_name" "(" [expression ["," expression]]* ")"
 ```

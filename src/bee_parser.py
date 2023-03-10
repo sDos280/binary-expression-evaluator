@@ -111,9 +111,9 @@ class Parser:
     """parser"""
     """
     The Grammar:
-    expression -> term {-|+ term}
-    term       -> factor {*|/ factor}
-    factor     -> integer | float | (expression) | -factor
+    expression -> term {"-"|"+" term}
+    term       -> factor {"*"|"/" factor}
+    factor     -> integer | float | "(" expression ")" | "-" factor | "function_name" "(" [expression ["," expression]]* ")"
     """
 
     def __init__(self, tokens: list[src.bee_token.Token]):
