@@ -1,20 +1,28 @@
-import src.bee_token
+from __future__ import annotations
+import src.bee_token as tk
+from typing import Union
 import enum
 import math
 
 
-class OperatorType(enum.IntEnum):
+class BinaryOpKind(enum.Enum):
+    """Binary Operator Type"""
     Addition = enum.auto()
     Subtraction = enum.auto()
     Multiplication = enum.auto()
     Division = enum.auto()
 
 
-class Value:
-    """value node"""
+class UnaryOpKind(enum.Enum):
+    """Unary Operator Type"""
+    Negate = enum.auto()
+    Plus = enum.auto()
+
+
+class Number:
 
     def __init__(self, value: int | float):
-        self.value = value
+        self.value: int | float = value
 
     def __str__(self):
         return str(self.value)
@@ -23,37 +31,52 @@ class Value:
         return self.value
 
 
-class Negate:
-    """negate node"""
-
-    def __init__(self, value: 'Operator | Value | Negate | Function'):
-        self.value = value
+class Identifier:
+    def __init__(self, name: str):
+        self.name: str = name
 
     def __str__(self):
-        return f"(-{str(self.value)})"
+        return self.name
+
+
+class UnaryOp:
+
+    def __init__(self, kind: UnaryOpKind, value: BinaryOp | UnaryOp | Number):
+        self.kind: UnaryOpKind = kind
+        self.value: BinaryOp | UnaryOp | Number = value
+
+    def __str__(self):
+        match self.kind:
+            case UnaryOpKind.Plus:
+                return f"(+{str(self.value)})"
+            case UnaryOpKind.Negate:
+                return f"(-{str(self.value)})"
 
     def eval(self):
-        return -self.value.eval()
+        match self.kind:
+            case UnaryOpKind.Plus:
+                return self.value.eval()
+            case UnaryOpKind.Negate:
+                return -self.value.eval()
 
-class Operator:
-    """operator node"""
 
-    def __init__(self, type: OperatorType, left: 'Operator | Value | Negate | Function', right: 'Operator | Value | Negate | Function'):
-        self.type = type
-        self.left = left
-        self.right = right
+class BinaryOp:
+    def __init__(self, kind: BinaryOpKind, left: BinaryOp | UnaryOp | Number, right: BinaryOp | UnaryOp | Number):
+        self.kind: BinaryOpKind = kind
+        self.left: BinaryOp | UnaryOp | Number = left
+        self.right: BinaryOp | UnaryOp | Number = right
 
     def __str__(self):
         str_ = "("
         str_ += f"{self.left} "
-        match self.type:
-            case OperatorType.Addition:
+        match self.kind:
+            case BinaryOpKind.Addition:
                 str_ += "+ "
-            case OperatorType.Subtraction:
+            case BinaryOpKind.Subtraction:
                 str_ += "- "
-            case OperatorType.Multiplication:
+            case BinaryOpKind.Multiplication:
                 str_ += "* "
-            case OperatorType.Division:
+            case BinaryOpKind.Division:
                 str_ += "/ "
 
         str_ += f"{self.right})"
@@ -61,30 +84,29 @@ class Operator:
         return str_
 
     def eval(self):
-        match self.type:
-            case OperatorType.Addition:
+        match self.kind:
+            case BinaryOpKind.Addition:
                 return self.left.eval() + self.right.eval()
-            case OperatorType.Subtraction:
+            case BinaryOpKind.Subtraction:
                 return self.left.eval() - self.right.eval()
-            case OperatorType.Multiplication:
+            case BinaryOpKind.Multiplication:
                 return self.left.eval() * self.right.eval()
-            case OperatorType.Division:
+            case BinaryOpKind.Division:
                 return self.left.eval() / self.right.eval()
+
 
 class Function:
     """function node"""
 
-    def __init__(self, name: str, expressions: list['Operator | Value | Negate | Function']):
-        self.name = name
-        self.expressions = expressions
+    def __init__(self, name: str, expressions: list[BinaryOp | UnaryOp | Number]):
+        self.name: str = name
+        self.expressions: list[BinaryOp | UnaryOp | Number] = expressions
 
     def __str__(self):
         str_ = f"{self.name}("
-        if len(self.expressions) == 1:
-            str_ += f"{self.expressions[0]})"
-        else:
-            for expression in self.expressions:
-                str_ += f"{expression}, "
+
+        for expression in self.expressions:
+            str_ += f"{expression}, "
 
         str_ = str_[:-2]
         str_ += ")"
@@ -93,6 +115,7 @@ class Function:
 
     def eval(self):
         match self.name:
+
             case "sin":
                 if len(self.expressions) == 1:
                     return math.sin(self.expressions[0].eval())
@@ -107,104 +130,147 @@ class Function:
             case _:
                 raise SyntaxError(f"the function \"{self.name}\" isn't supported")
 
+
 class Parser:
-    """parser"""
-    """
-    The Grammar:
-    expression -> term {"-"|"+" term}
-    term       -> factor {"*"|"/" factor}
-    factor     -> integer | float | "(" expression ")" | "-" factor | "function_name" "(" [expression ["," expression]]* ")"
-    """
+    def __init__(self, tokens: list[tk.Token]):
+        self.tokens: list[tk.Token] = tokens
+        self.current_token: tk.Token = None
+        self.index: int = -1
+        self.AST = None
 
-    def __init__(self, tokens: list[src.bee_token.Token]):
-        self.tokens: list[src.bee_token.Token] = tokens
-        self.current_token: src.bee_token.Token = tokens[0]
-        self.index: int = 0
-        self.start_node = self.parse_expression()
-
-    def scan_token(self):
+    def peek_token(self):
         self.index += 1
         self.current_token = self.tokens[self.index]
 
-    def parse_expression(self):
-        left_term = self.parse_term()
-        while True:
-            if self.current_token.kind == src.bee_token.TokenKind.Plus:
-                self.scan_token()
-                right_term = self.parse_term()
-                if right_term is None:
-                    return None
-                left_term = Operator(OperatorType.Addition, left_term, right_term)
-            elif self.current_token.kind == src.bee_token.TokenKind.Minus:
-                self.scan_token()
-                right_term = self.parse_term()
-                if right_term is None:
-                    return None
-                left_term = Operator(OperatorType.Subtraction, left_term, right_term)
-            else:
-                return left_term
+    def is_token_kind(self, kind: tk.TokenKind) -> BinaryOp | UnaryOp | Number | Identifier:
+        return self.current_token.kind == kind
 
-    def parse_term(self):
-        left_factor = self.parse_factor()
-        while True:
-            if self.current_token.kind == src.bee_token.TokenKind.Asterisk:
-                self.scan_token()
-                right_factor = self.parse_factor()
-                if right_factor is None:
-                    return None
-                left_factor = Operator(OperatorType.Multiplication, left_factor, right_factor)
-            elif self.current_token.kind == src.bee_token.TokenKind.ForwardSlash:
-                self.scan_token()
-                right_factor = self.parse_factor()
-                if right_factor is None:
-                    return None
-                left_factor = Operator(OperatorType.Division, left_factor, right_factor)
-            else:
-                return left_factor
+    def peek_primary_expression(self):
+        if self.is_token_kind(tk.TokenKind.Integer):
+            number: Number = Number(int(self.current_token.string))
 
-    def parse_factor(self):
-        if self.current_token.kind == src.bee_token.TokenKind.Integer:
-            temp_ = Value(int(self.current_token.string))
-            self.scan_token()
-            return temp_
-        elif self.current_token.kind == src.bee_token.TokenKind.Float:
-            temp_ = Value(float(self.current_token.string))
-            self.scan_token()
-            return temp_
-        elif self.current_token.kind == src.bee_token.TokenKind.OpenParenthesis:
-            self.scan_token()
-            sub_expression = self.parse_expression()
-            if sub_expression is None:
-                return None
-            if self.current_token.kind == src.bee_token.TokenKind.ClosingParenthesis:
-                self.scan_token()
-                return sub_expression
-            else:
-                return None
-        elif self.current_token.kind == src.bee_token.TokenKind.Minus:
-            self.scan_token()
-            return Negate(self.parse_factor())
-        elif self.current_token.kind == src.bee_token.TokenKind.Identifier:
-            name = self.current_token.string
-            self.scan_token()
-            expressions: list['Operator | Value | Negate'] = []
-            if self.current_token.kind == src.bee_token.TokenKind.OpenParenthesis:
-                self.scan_token()
-                sub_expression = self.parse_expression()
-                expressions.append(sub_expression)
+            self.peek_token()  # peek number token
 
-                while sub_expression is not None and self.current_token.kind == src.bee_token.TokenKind.Comma:
-                    self.scan_token()
-                    sub_expression = self.parse_expression()
-                    if sub_expression is not None:
-                        expressions.append(sub_expression)
+            return number
+        elif self.is_token_kind(tk.TokenKind.Float):
+            number: Number = Number(float(self.current_token.string))
 
-                if self.current_token.kind == src.bee_token.TokenKind.ClosingParenthesis:
-                    self.scan_token()
-                    return Function(name, expressions)
-                else:
-                    return None
+            self.peek_token()  # peek number token
+
+            return number
+        elif self.is_token_kind(tk.TokenKind.Identifier):
+            number: Identifier = Identifier(self.current_token.string)
+
+            self.peek_token()  # peek identifier token
+
+            return number
+        elif self.is_token_kind(tk.TokenKind.OpeningParenthesis):
+            self.peek_token()  # peek open parenthesis token
+
+            expression: BinaryOp | UnaryOp | Number = self.peek_expression()
+
+            if not self.is_token_kind(tk.TokenKind.ClosingParenthesis):
+                raise SyntaxError("expect a closing parenthesis")
             else:
-                return None
+                self.peek_token()  # peek close parenthesis token
+
+            return expression
+
+    def peek_postfix_expression(self):
+        primary_expression: BinaryOp | UnaryOp | Number | Identifier = self.peek_primary_expression()
+        if isinstance(primary_expression, Identifier):  # a function call
+
+            expressions: list[BinaryOp | UnaryOp | Number] = []
+            if not self.is_token_kind(tk.TokenKind.OpeningParenthesis):
+                raise SyntaxError("An opening parenthesis is needed for function call")
+
+            self.peek_token()  # peek opening parenthesis token
+
+            if self.is_token_kind(tk.TokenKind.ClosingParenthesis):
+                self.peek_token()  # peek closing parenthesis token
+                return Function(primary_expression.name, [])
+
+            while not self.is_token_kind(tk.TokenKind.END):
+                expression: BinaryOp | UnaryOp | Number = self.peek_expression()
+
+                expressions.append(expression)
+
+                if self.is_token_kind(tk.TokenKind.Comma):
+                    self.peek_token()  # peek comma token
+
+                if self.is_token_kind(tk.TokenKind.ClosingParenthesis):
+                    self.peek_token()  # peek closing parenthesis token
+                    break
+
+            return Function(primary_expression.name, expressions)
         else:
-            return None
+            return primary_expression
+
+    def peek_unary_expression(self) -> BinaryOp | UnaryOp | Number:
+        if self.is_token_kind(tk.TokenKind.ADD_OP):
+            self.peek_token()  # peek the add op token
+
+            postfix_expression: BinaryOp | UnaryOp | Number = self.peek_postfix_expression()
+
+            return UnaryOp(UnaryOpKind.Plus, postfix_expression)
+
+        elif self.is_token_kind(tk.TokenKind.MIN_OP):
+            self.peek_token()  # peek the min op token
+
+            postfix_expression: BinaryOp | UnaryOp | Number = self.peek_postfix_expression()
+
+            return UnaryOp(UnaryOpKind.Negate, postfix_expression)
+
+        postfix_expression: BinaryOp | UnaryOp | Number = self.peek_postfix_expression()
+
+        return postfix_expression
+
+    def peek_multiplicative_expression(self) -> BinaryOp | UnaryOp | Number:
+        unary_expression: BinaryOp | UnaryOp | Number = self.peek_unary_expression()
+
+        if self.is_token_kind(tk.TokenKind.MUL_OP):
+            self.peek_token()  # peek the mul op token
+
+            additive_expression: BinaryOp | UnaryOp | Number = self.peek_multiplicative_expression()
+
+            return BinaryOp(BinaryOpKind.Multiplication, unary_expression, additive_expression)
+
+        elif self.is_token_kind(tk.TokenKind.DIV_OP):
+            self.peek_token()  # peek the div op token
+
+            additive_expression: BinaryOp | UnaryOp | Number = self.peek_multiplicative_expression()
+
+            return BinaryOp(BinaryOpKind.Division, unary_expression, additive_expression)
+
+        return unary_expression
+
+    def peek_additive_expression(self) -> BinaryOp | UnaryOp | Number:
+        multiplicative_expression: BinaryOp | UnaryOp | Number = self.peek_multiplicative_expression()
+
+        if self.is_token_kind(tk.TokenKind.ADD_OP):
+            self.peek_token()  # peek the add op token
+
+            additive_expression: BinaryOp | UnaryOp | Number = self.peek_additive_expression()
+
+            return BinaryOp(BinaryOpKind.Addition, multiplicative_expression, additive_expression)
+
+        elif self.is_token_kind(tk.TokenKind.MIN_OP):
+            self.peek_token()  # peek the min op token
+
+            additive_expression: BinaryOp | UnaryOp | Number = self.peek_additive_expression()
+
+            return BinaryOp(BinaryOpKind.Subtraction, multiplicative_expression, additive_expression)
+
+        return multiplicative_expression
+
+    def peek_expression(self) -> BinaryOp | UnaryOp | Number:
+        additive_expression: BinaryOp | UnaryOp | Number = self.peek_additive_expression()
+
+        return additive_expression
+
+    def parse(self):
+        self.peek_token()  # peek the "-1" token
+
+        self.AST = self.peek_expression()
+
+        print(self.AST)

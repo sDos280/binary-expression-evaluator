@@ -7,7 +7,7 @@ class TokenKind(enum.Enum):
     MUL_OP = enum.auto()  # *
     DIV_OP = enum.auto()  # /
 
-    OpenParenthesis = enum.auto()  # (
+    OpeningParenthesis = enum.auto()  # (
     ClosingParenthesis = enum.auto()  # )
     Comma = enum.auto()  # ,
 

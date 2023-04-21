@@ -33,15 +33,14 @@ postfix_expression
 	;
 	
 unary_expression
-	: postfix_expression
-	| unary_operator postfix_expression
+    : unary_operator postfix_expression
+	| postfix_expression 
 	;
 	
 multiplicative_expression
 	: unary_expression
 	| multiplicative_expression '*' unary_expression
 	| multiplicative_expression '/' unary_expression
-	| multiplicative_expression '%' unary_expression
 	;
 
 additive_expression

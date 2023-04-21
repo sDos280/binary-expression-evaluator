@@ -27,30 +27,7 @@ class Lexer:
     def is_char_seperator(self) -> bool:
         return self.is_char(",()")
 
-    def expected_char(self, char: str):
-        if self.current_char not in char:
-            error_string: str = f"Expected a \"{char}\" char in the {self.index} index\n"
-            error_string += self.input_string + '\n'
-            error_string += ' ' * self.index + '^\n'
-            error_string += ' ' * self.index + char
-            raise SyntaxError(error_string)
-
-    def expected_char_alpha(self):
-        if not self.current_char.isalpha():
-            error_string: str = f"Expected an alpha char"
-            error_string += self.input_string + '\n'
-            error_string += ' ' * self.index + '^\n'
-            raise SyntaxError(error_string)
-
-    def expected_char_numeric(self):
-        if not self.current_char.isnumeric():
-            error_string: str = f"Expected an numeric char"
-            error_string += self.input_string + '\n'
-            error_string += ' ' * self.index + '^\n'
-            raise SyntaxError(error_string)
-
     def peek_operator(self) -> tk.Token:
-        self.expected_char("+-*/")
 
         str_: str = self.current_char
 
@@ -71,7 +48,6 @@ class Lexer:
                 return tk.Token(tk.TokenKind.DIV_OP, '/')
 
     def peek_seperator(self) -> tk.Token:
-        self.expected_char(",()")
 
         str_: str = self.current_char
 
@@ -83,14 +59,13 @@ class Lexer:
 
         match str_:
             case '(':
-                return tk.Token(tk.TokenKind.OpenParenthesis, '(')
+                return tk.Token(tk.TokenKind.OpeningParenthesis, '(')
             case ')':
                 return tk.Token(tk.TokenKind.ClosingParenthesis, ')')
             case ',':
                 return tk.Token(tk.TokenKind.MUL_OP, ',')
 
     def peek_identifier(self) -> tk.Token:
-        self.expected_char_alpha()
 
         str_: str = self.current_char
 
@@ -103,7 +78,6 @@ class Lexer:
         return tk.Token(tk.TokenKind.Identifier, str_)
 
     def peek_numeric(self) -> tk.Token:
-        self.expected_char_numeric()
 
         str_: str = self.current_char
 
@@ -145,3 +119,5 @@ class Lexer:
                 self.tokens.append(numeric_token)
             else:
                 self.peek_char()
+
+        self.tokens.append(tk.Token(tk.TokenKind.END, ''))
