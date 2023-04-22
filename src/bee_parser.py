@@ -135,7 +135,7 @@ class Parser:
         self.tokens: list[tk.Token] = tokens
         self.current_token: tk.Token = None
         self.index: int = -1
-        self.AST = None
+        self.AST: BinaryOp | UnaryOp | Number = None
 
     def peek_token(self):
         self.index += 1

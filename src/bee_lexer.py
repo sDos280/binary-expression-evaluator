@@ -53,10 +53,6 @@ class Lexer:
 
         self.peek_char()
 
-        while not self.is_char_end_of_file() and self.is_char_seperator():
-            str_ += self.current_char
-            self.peek_char()
-
         match str_:
             case '(':
                 return tk.Token(tk.TokenKind.OpeningParenthesis, '(')
