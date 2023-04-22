@@ -158,11 +158,11 @@ class Parser:
 
             return number
         elif self.is_token_kind(tk.TokenKind.Identifier):
-            number: Identifier = Identifier(self.current_token.string)
+            identifier: Identifier = Identifier(self.current_token.string)
 
             self.peek_token()  # peek identifier token
 
-            return number
+            return identifier
         elif self.is_token_kind(tk.TokenKind.OpeningParenthesis):
             self.peek_token()  # peek open parenthesis token
 
