@@ -273,5 +273,3 @@ class Parser:
         self.peek_token()  # peek the "-1" token
 
         self.AST = self.peek_expression()
-
-        print(self.AST)
