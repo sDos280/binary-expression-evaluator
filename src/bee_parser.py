@@ -103,11 +103,11 @@ class Function:
 
     def __str__(self):
         str_ = f"{self.name}("
+        if len(self.expressions) != 0:
+            for expression in self.expressions:
+                str_ += f"{expression}, "
 
-        for expression in self.expressions:
-            str_ += f"{expression}, "
-
-        str_ = str_[:-2]
+            str_ = str_[:-2]
         str_ += ")"
 
         return str_
@@ -119,12 +119,12 @@ class Function:
                 if len(self.expressions) == 1:
                     return math.sin(self.expressions[0].eval())
                 else:
-                    raise SyntaxError(f"too much arguments")
+                    raise SyntaxError(f"too much/few arguments")
             case "cos":
                 if len(self.expressions) == 1:
                     return math.cos(self.expressions[0].eval())
                 else:
-                    raise SyntaxError(f"too much arguments")
+                    raise SyntaxError(f"too much/few arguments")
 
             case _:
                 raise SyntaxError(f"the function \"{self.name}\" isn't supported")
