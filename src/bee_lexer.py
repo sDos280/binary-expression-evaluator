@@ -59,7 +59,7 @@ class Lexer:
             case ')':
                 return tk.Token(tk.TokenKind.ClosingParenthesis, ')')
             case ',':
-                return tk.Token(tk.TokenKind.MUL_OP, ',')
+                return tk.Token(tk.TokenKind.Comma, ',')
 
     def peek_identifier(self) -> tk.Token:
 
