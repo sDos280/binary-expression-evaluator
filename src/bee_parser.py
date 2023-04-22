@@ -1,6 +1,5 @@
 from __future__ import annotations
 import src.bee_token as tk
-from typing import Union
 import enum
 import math
 
@@ -228,40 +227,42 @@ class Parser:
     def peek_multiplicative_expression(self) -> BinaryOp | UnaryOp | Number:
         unary_expression: BinaryOp | UnaryOp | Number = self.peek_unary_expression()
 
-        if self.is_token_kind(tk.TokenKind.MUL_OP):
-            self.peek_token()  # peek the mul op token
+        while True:
+            if self.is_token_kind(tk.TokenKind.MUL_OP):
+                self.peek_token()  # peek the mul op token
 
-            additive_expression: BinaryOp | UnaryOp | Number = self.peek_multiplicative_expression()
+                sub_unary_expression: BinaryOp | UnaryOp | Number = self.peek_unary_expression()
 
-            return BinaryOp(BinaryOpKind.Multiplication, unary_expression, additive_expression)
+                unary_expression = BinaryOp(BinaryOpKind.Multiplication, unary_expression, sub_unary_expression)
 
-        elif self.is_token_kind(tk.TokenKind.DIV_OP):
-            self.peek_token()  # peek the div op token
+            elif self.is_token_kind(tk.TokenKind.DIV_OP):
+                self.peek_token()  # peek the div op token
 
-            additive_expression: BinaryOp | UnaryOp | Number = self.peek_multiplicative_expression()
+                sub_unary_expression: BinaryOp | UnaryOp | Number = self.peek_unary_expression()
 
-            return BinaryOp(BinaryOpKind.Division, unary_expression, additive_expression)
-
-        return unary_expression
+                unary_expression = BinaryOp(BinaryOpKind.Division, unary_expression, sub_unary_expression)
+            else:
+                return unary_expression
 
     def peek_additive_expression(self) -> BinaryOp | UnaryOp | Number:
         multiplicative_expression: BinaryOp | UnaryOp | Number = self.peek_multiplicative_expression()
 
-        if self.is_token_kind(tk.TokenKind.ADD_OP):
-            self.peek_token()  # peek the add op token
+        while True:
+            if self.is_token_kind(tk.TokenKind.ADD_OP):
+                self.peek_token()  # peek the add op token
 
-            additive_expression: BinaryOp | UnaryOp | Number = self.peek_additive_expression()
+                sub_multiplicative_expression: BinaryOp | UnaryOp | Number = self.peek_multiplicative_expression()
 
-            return BinaryOp(BinaryOpKind.Addition, multiplicative_expression, additive_expression)
+                multiplicative_expression = BinaryOp(BinaryOpKind.Addition, multiplicative_expression, sub_multiplicative_expression)
 
-        elif self.is_token_kind(tk.TokenKind.MIN_OP):
-            self.peek_token()  # peek the min op token
+            elif self.is_token_kind(tk.TokenKind.MIN_OP):
+                self.peek_token()  # peek the min op token
 
-            additive_expression: BinaryOp | UnaryOp | Number = self.peek_additive_expression()
+                sub_multiplicative_expression: BinaryOp | UnaryOp | Number = self.peek_multiplicative_expression()
 
-            return BinaryOp(BinaryOpKind.Subtraction, multiplicative_expression, additive_expression)
-
-        return multiplicative_expression
+                multiplicative_expression = BinaryOp(BinaryOpKind.Subtraction, multiplicative_expression, sub_multiplicative_expression)
+            else:
+                return multiplicative_expression
 
     def peek_expression(self) -> BinaryOp | UnaryOp | Number:
         additive_expression: BinaryOp | UnaryOp | Number = self.peek_additive_expression()
